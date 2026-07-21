@@ -1,4 +1,8 @@
+import { readFileSync } from "node:fs"
 import { defineConfig } from "tsup"
+
+const { version } = JSON.parse(readFileSync("./package.json", "utf8"))
+const define = { __REPLAYDECK_VERSION__: JSON.stringify(version) }
 
 export default defineConfig([
   {
@@ -8,6 +12,7 @@ export default defineConfig([
     clean: true,
     treeshake: true,
     target: "es2018",
+    define,
   },
   {
     entry: { replaydeck: "src/global.ts" },
@@ -17,5 +22,6 @@ export default defineConfig([
     treeshake: true,
     target: "es2018",
     outExtension: () => ({ js: ".global.js" }),
+    define,
   },
 ])

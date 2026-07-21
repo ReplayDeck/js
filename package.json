@@ -24,10 +24,12 @@
     "url": "git+https://github.com/replaydeck/js.git"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "tsup",
+    "prepack": "tsup",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
