@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/replaydeck/js.git"
+    "url": "git+https://github.com/ReplayDeck/js.git"
   },
   "publishConfig": {
     "access": "public",
