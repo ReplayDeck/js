@@ -1,6 +1,8 @@
-import type { eventWithTime } from "rrweb"
+import type { eventWithTime, recordOptions } from "rrweb"
 
 export type { eventWithTime }
+
+export type SamplingStrategy = NonNullable<recordOptions<eventWithTime>["sampling"]>
 
 export type ErrorCode = "config" | "bad_key" | "bad_origin" | "too_large" | "network"
 

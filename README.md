@@ -53,6 +53,7 @@ rd.start()
 | `flushIntervalMs` | `5000` | clamped to a 1s floor, because the collector rate-limits ingest |
 | `maxChunkBytes` | `900000` | a chunk is cut before this to stay under the 2MB body cap |
 | `recordCanvas` | `false` | |
+| `sampling` | `{}` | handed to rrweb untouched; `{ mousemove: 30 }` trades bytes for smoother pointer playback |
 | `onError` | | called on a fatal misconfig (bad key/origin) or a dropped chunk |
 
 ## The parts that matter
