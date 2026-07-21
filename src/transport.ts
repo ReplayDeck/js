@@ -1,6 +1,7 @@
 import type { ResolvedConfig } from "./config"
 import type { Session } from "./session"
 import { ReplayDeckError, type eventWithTime } from "./types"
+import { SDK, VERSION } from "./version"
 
 type Batch = eventWithTime[]
 type Action = "ok" | "retry" | "rotate" | "drop" | "fatal"
@@ -83,6 +84,8 @@ export class Transport {
       events: batch,
       url: location.href,
       ua: navigator.userAgent,
+      sdk: SDK,
+      sdkVersion: VERSION,
     })
   }
 
