@@ -82,3 +82,7 @@ regardless of the content type.
 that session (a rotated key, or retention purged it), so the recorder mints a new one and takes a
 fresh full snapshot as its first chunk. A `401` or `403` is a config problem, not a transient
 one, so it stops recording and calls `onError` rather than retrying into nothing.
+
+## License
+
+MIT. The browser bundle embeds rrweb, also MIT; see `THIRD-PARTY-NOTICES.md`.
