@@ -1,4 +1,4 @@
-import { ReplayDeckError } from "./types"
+import { ReplayDeckError, type SamplingStrategy } from "./types"
 
 export interface ReplayDeckConfig {
   key: string
@@ -10,6 +10,7 @@ export interface ReplayDeckConfig {
   flushIntervalMs?: number
   maxChunkBytes?: number
   recordCanvas?: boolean
+  sampling?: SamplingStrategy
   onError?: (error: ReplayDeckError) => void
 }
 
@@ -23,6 +24,7 @@ export interface ResolvedConfig {
   flushIntervalMs: number
   maxChunkBytes: number
   recordCanvas: boolean
+  sampling: SamplingStrategy
   onError: (error: ReplayDeckError) => void
 }
 
@@ -43,6 +45,7 @@ export function resolveConfig(input: ReplayDeckConfig): ResolvedConfig {
     flushIntervalMs: Math.max(1000, input.flushIntervalMs ?? 5000),
     maxChunkBytes: Math.min(1_500_000, Math.max(50_000, input.maxChunkBytes ?? 900_000)),
     recordCanvas: input.recordCanvas ?? false,
+    sampling: input.sampling ?? {},
     onError: input.onError ?? (() => {}),
   }
 }

@@ -29,6 +29,7 @@ export class Recorder {
       maskTextClass: this.cfg.maskTextClass,
       blockClass: this.cfg.blockClass,
       recordCanvas: this.cfg.recordCanvas,
+      sampling: this.cfg.sampling,
       checkoutEveryNms: CHECKOUT_MS,
     })
     this.timer = setInterval(() => this.flush(), this.cfg.flushIntervalMs)
