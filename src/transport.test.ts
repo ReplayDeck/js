@@ -50,6 +50,52 @@ describe("Transport", () => {
     expect(session.seq).toBe(2)
   })
 
+  it("never sends different chunks under the same seq", async () => {
+    const session = new Session(memStore())
+    const sentBySeq = new Map<number, Set<string>>()
+    const record = (body: string) => {
+      const { seq, events } = JSON.parse(body)
+      const key = JSON.stringify(events)
+      if (!sentBySeq.has(seq)) sentBySeq.set(seq, new Set())
+      sentBySeq.get(seq)!.add(key)
+    }
+    vi.stubGlobal("fetch", async (_url: string, init: { body: string }) => {
+      record(init.body)
+      return { status: 204 } as Response
+    })
+    vi.stubGlobal("navigator", {
+      sendBeacon: (_url: string, body: string) => {
+        record(body)
+        return true
+      },
+    })
+
+    const batch = (n: number) => [{ type: 3, timestamp: n, data: {} } as unknown as eventWithTime]
+    const t = new Transport(cfg(), session, () => {}, instant)
+    t.enqueue(batch(1))
+    t.enqueue(batch(2))
+    t.enqueue(batch(3))
+    t.flushBeacon()
+    await t.flush()
+    t.enqueue(batch(4))
+    await t.flush()
+
+    const colisoes = [...sentBySeq.entries()].filter(([, bodies]) => bodies.size > 1)
+    expect(colisoes).toEqual([])
+  })
+
+  it("keeps the seq when the beacon is refused, so it can be sent again", () => {
+    const session = new Session(memStore())
+    vi.stubGlobal("navigator", { sendBeacon: () => false })
+
+    const t = new Transport(cfg(), session, () => {}, instant)
+    t.enqueue([evt])
+    t.enqueue([evt])
+    t.flushBeacon()
+
+    expect(session.seq).toBe(0)
+  })
+
   it("rotates the session on 410 without advancing seq", async () => {
     const session = new Session(memStore())
     const before = session.id

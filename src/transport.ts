@@ -60,10 +60,14 @@ export class Transport {
   flushBeacon(): void {
     if (this.stopped || typeof navigator === "undefined" || !navigator.sendBeacon) return
     let seq = this.session.seq
+    let sent = 0
     for (const batch of this.queue) {
-      navigator.sendBeacon(this.endpoint(), this.body(batch, seq))
-      seq += 1
+      if (navigator.sendBeacon(this.endpoint(), this.body(batch, seq))) {
+        seq += 1
+        sent += 1
+      }
     }
+    if (sent > 0) this.session.reserve(seq)
     this.queue = []
   }
 
