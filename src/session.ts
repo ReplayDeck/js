@@ -26,6 +26,12 @@ export class Session {
     this.store.setItem(SEQ_KEY, String(this.seq))
   }
 
+  reserve(next: number): void {
+    if (next <= this.seq) return
+    this.seq = next
+    this.store.setItem(SEQ_KEY, String(this.seq))
+  }
+
   rotate(): void {
     this.id = newId()
     this.seq = 0
