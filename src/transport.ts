@@ -8,6 +8,7 @@ type Action = "ok" | "retry" | "rotate" | "drop" | "fatal"
 
 const MAX_BACKOFF_MS = 30_000
 const KEEPALIVE_LIMIT = 60_000
+const MAX_QUEUED_BATCHES = 32
 
 function classify(status: number): Action {
   switch (status) {
@@ -46,6 +47,10 @@ export class Transport {
   enqueue(batch: Batch): void {
     if (this.stopped || batch.length === 0) return
     this.queue.push(batch)
+    if (this.queue.length > MAX_QUEUED_BATCHES) {
+      this.rotateAfterBacklogOverflow()
+      return
+    }
     void this.pump()
   }
 
@@ -100,6 +105,7 @@ export class Transport {
       while (this.queue.length > 0 && !this.stopped) {
         const batch = this.queue[0]!
         const status = await this.post(this.body(batch, this.session.seq))
+        if (this.queue[0] !== batch) continue
         const action = classify(status)
 
         if (action === "ok") {
@@ -142,6 +148,15 @@ export class Transport {
     } catch {
       return 0
     }
+  }
+
+  private rotateAfterBacklogOverflow(): void {
+    this.queue = []
+    this.attempt = 0
+    this.cfg.onError(
+      new ReplayDeckError("network", `replaydeck: ${MAX_QUEUED_BATCHES} chunks pending, dropping them and starting a new session`)
+    )
+    queueMicrotask(() => this.onRotate())
   }
 
   private backoff(): number {

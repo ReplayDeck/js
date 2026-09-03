@@ -53,7 +53,7 @@ rd.start()
 | `flushIntervalMs` | `5000` | clamped to a 1s floor, because the collector rate-limits ingest |
 | `maxChunkBytes` | `900000` | a chunk is cut before this to stay under the 2MB body cap |
 | `recordCanvas` | `false` | |
-| `sampling` | `{}` | handed to rrweb untouched; `{ mousemove: 30 }` trades bytes for smoother pointer playback |
+| `sampling` | `{ scroll: 50 }` | merged over rrweb's defaults; scroll is sampled at 50ms instead of rrweb's 100ms because at 10 Hz fast scrolls stall in replay, and `{ mousemove: 30 }` does the same for the pointer |
 | `onError` | | called on a fatal misconfig (bad key/origin) or a dropped chunk |
 
 ## The parts that matter

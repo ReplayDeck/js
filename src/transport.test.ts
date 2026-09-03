@@ -139,4 +139,37 @@ describe("Transport", () => {
     expect(init.method).toBe("POST")
     expect((init.headers as Record<string, string>)["Content-Type"]).toBe("text/plain")
   })
+
+  it("drops the backlog and rotates instead of growing without bound while offline", async () => {
+    const session = new Session(memStore())
+    vi.stubGlobal("fetch", async () => {
+      throw new Error("offline")
+    })
+    const errors: string[] = []
+    const rotate = vi.fn()
+    const neverWake = () => new Promise<void>(() => {})
+    const t = new Transport(cfg({ onError: (e: Error) => errors.push(e.message) }), session, rotate, neverWake)
+
+    for (let i = 0; i < 33; i++) t.enqueue([evt])
+    await new Promise((r) => setTimeout(r, 0))
+
+    expect(rotate).toHaveBeenCalledTimes(1)
+    expect(errors).toHaveLength(1)
+    expect(errors[0]).toMatch(/new session/)
+  })
+
+  it("ignores the in-flight response when the queue was reset underneath it", async () => {
+    const session = new Session(memStore())
+    let release: (s: number) => void = () => {}
+    vi.stubGlobal("fetch", () => new Promise<Response>((r) => (release = (s) => r({ status: s } as Response))))
+    const t = new Transport(cfg(), session, () => {}, instant)
+    t.enqueue([evt])
+    await Promise.resolve()
+
+    for (let i = 0; i < 33; i++) t.enqueue([evt])
+    release(204)
+    await new Promise((r) => setTimeout(r, 0))
+
+    expect(session.seq).toBe(0)
+  })
 })

@@ -28,6 +28,8 @@ export interface ResolvedConfig {
   onError: (error: ReplayDeckError) => void
 }
 
+const SCROLL_SAMPLE_MS = 50
+
 export function resolveConfig(input: ReplayDeckConfig): ResolvedConfig {
   if (!input || !input.key) {
     throw new ReplayDeckError("config", "replaydeck: `key` is required")
@@ -45,7 +47,7 @@ export function resolveConfig(input: ReplayDeckConfig): ResolvedConfig {
     flushIntervalMs: Math.max(1000, input.flushIntervalMs ?? 5000),
     maxChunkBytes: Math.min(1_500_000, Math.max(50_000, input.maxChunkBytes ?? 900_000)),
     recordCanvas: input.recordCanvas ?? false,
-    sampling: input.sampling ?? {},
+    sampling: { scroll: SCROLL_SAMPLE_MS, ...input.sampling },
     onError: input.onError ?? (() => {}),
   }
 }
