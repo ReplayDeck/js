@@ -42,6 +42,7 @@ export class Recorder {
   }
 
   rotate(): void {
+    if (!this.stopFn) return
     this.session.rotate()
     this.buffer = []
     this.bytes = 0
